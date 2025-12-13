@@ -1,0 +1,57 @@
+""" MIT License
+Copyright 2023 David Yang
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights 
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+copies of the Software, and to permit persons to whom the Software is 
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
+from daygels import hdes, poisson
+from hdes_plot import plot_results
+
+# Operational Weight - lbs, Single Wheel Factor, Tire Pressure - psi
+vehicle =[710000.0, 0.0584, 185.0]
+# Wheel X Coordinates - in, Wheel Y Coordinates - in
+wheels = [[0.0, -44.0, 0.0, -44.0, 106.0, 150.0, 106.0, 150.0, -142.0, -186.0, -142.0, -186.0, 248.0, 292.0, 248.0, 292.0], 
+         [0.0, 0.0, -58.0, -58.0, 0.0, 0.0, -58.0, -58.0, 63.0, 121.0, 63.0, 121.0, 63.0, 121.0, 63.0, 121.0]]
+# Result Output X Coordinate - in, Result Output Y Coordinate - in
+output = [0.0, 0.0]
+
+# 3 layer, upper layer to lower layer,
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[8.0, 8.0, 999.0], [3000000.0, 30000.0, 8000.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+
+# Values of subgrade modulus of elasticity
+esubs = [2592.0, 4320.0, 7200.0, 12000.0, 20000.0, 33333.33]
+
+# Layer for values of thickness, with top layer equal to 1
+layer_th = 1
+
+start_th = 6.0 # start thickness
+end_th = 16.0 # end thickness
+delta_th = 2.0 # increment of thickness
+
+ths = [start_th + i * delta_th for i in range(int((end_th - start_th) / delta_th) + 1)]
+
+# Layer for stress values at bottom of layer at output location
+layer_str = 1
+
+# get and plot layer stress and surface deflection
+results_str, results_wz = hdes(vehicle, wheels, output, pavement, esubs, ths, layer_th, layer_str)
+print(results_wz)
+print(results_str)
+plot_results(vehicle, wheels, output, pavement, esubs, ths, layer_th, layer_str, results_str, results_wz)
+
+# See hdes_example.png

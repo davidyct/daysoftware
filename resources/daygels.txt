@@ -1,0 +1,147 @@
+""" MIT License
+Copyright 2023 David Yang
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights 
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+copies of the Software, and to permit persons to whom the Software is 
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
+from math import log, pi, sqrt
+from bessel import integrate_bessel
+from layer import f_s_all
+
+def put_hn(hs): # H(n)
+    sum, hns = 0.0, []
+    for ih in range(len(hs)):
+        sum += hs[ih]
+        hns.append(sum)
+    return hns
+def poisson(e):
+    # empirical relationship between modulus of elasticity and poisson's ratio    
+    return 0.65 - 0.08 * log(e) / log(10.0)
+def get_result(params): 
+    ij0, psi, rr = params  
+    return [-ij0[0][0] * psi, -ij0[1][3] * psi * rr, -ij0[2][2] * psi, -ij0[3][1] * psi * rr, 
+            -(ij0[4][0] - ij0[6][1]) * psi, -(ij0[5][0] + ij0[6][1]) * psi]
+def get_rr(params):
+    xwheel, ywheel, xout, yout = params
+    xrs, yrs, rrs = [], [], []
+    for i, x in enumerate(xwheel):
+        xr, yr = xout - xwheel[i], yout - ywheel[i]
+        rr = sqrt(xr * xr + yr * yr)
+        if rr > 0.0:
+            xr, yr = xr / rr, yr / rr
+        else:
+            xr, yr = 1.0, 0.0
+        xrs.append(xr)
+        yrs.append(yr)
+        rrs.append(rr)
+    return [xrs, yrs, rrs]
+def get_radius(params):
+    opwgt, wgt, psi = params
+    return sqrt(opwgt * wgt / psi / pi)
+def run_gels(params):
+    vehicle, wheels, output, pavement = params
+    opwgt, wgt, psi = vehicle[0], vehicle[1], vehicle[2]
+    ar = get_radius((opwgt, wgt, psi))
+    xwheel, ywheel, xout, yout = wheels[0], wheels[1], output[0], output[1]
+    th, ev, ps = pavement[0], pavement[1], pavement[2]
+    hns, rrs, ss = put_hn(th), get_rr((xwheel, ywheel, xout, yout)), []
+    results = [[0.0 for j in range(7)] for i in range((len(th) - 1) * 2 + 1)]
+    for ir in range(len(xwheel)):
+        xr, yr, rr, lz, iz, z1, z2 = rrs[0][ir], rrs[1][ir], rrs[2][ir], [], 0, [], []
+        if len(th) > 1:
+            for ln, zz in enumerate(hns[:-1]):
+                # top of layer
+                lz.append(ln + 1)
+                z1.append(zz - th[ln])
+                z2.append(zz)
+                ij0 = integrate_bessel(f_s_all, (7, ar, rr, zz - th[ln], th, ev, ps, ln + 1, hns))
+                ssh = get_result((ij0, psi, rr))
+                # polar to cartesian
+                sxx = ssh[4] * xr * xr + ssh[5] * yr * yr
+                sxy = ssh[4] * xr * yr - ssh[5] * xr * yr
+                syy = ssh[4] * yr * yr + ssh[5] * xr * xr
+                szz, srz, wz, ur = ssh[0], ssh[1], ssh[2], ssh[3]
+                for i, s in enumerate([sxx, sxy, syy, szz, srz, wz, ur]):
+                    results[iz][i] += s
+                iz += 1
+                # bottom of layer
+                lz.append(ln + 1)
+                z1.append(zz)
+                z2.append(zz)
+                ij0 = integrate_bessel(f_s_all, (7, ar, rr, zz, th, ev, ps, ln + 1, hns))
+                ssh = get_result((ij0, psi, rr))
+                sxx = ssh[4] * xr * xr + ssh[5] * yr * yr
+                sxy = ssh[4] * xr * yr - ssh[5] * xr * yr
+                syy = ssh[4] * yr * yr + ssh[5] * xr * xr
+                szz, srz, wz, ur = ssh[0], ssh[1], ssh[2], ssh[3] 
+                for i, s in enumerate([sxx, sxy, syy, szz, srz, wz, ur]):
+                    results[iz][i] += s
+                iz += 1
+        # top of lowest layer   
+        lz.append(len(th))
+        z1.append(hns[-1] - th[-1])
+        z2.append(hns[-1])
+        ij0 = integrate_bessel(f_s_all, (7, ar, rr, hns[-1] - th[-1], th, ev, ps, len(th), hns))
+        ssh = get_result((ij0, psi, rr))
+        sxx = ssh[4] * xr * xr + ssh[5] * yr * yr
+        sxy = ssh[4] * xr * yr - ssh[5] * xr * yr
+        syy = ssh[4] * yr * yr + ssh[5] * xr * xr
+        szz, srz, wz, ur = ssh[0], ssh[1], ssh[2], ssh[3]    
+        for i, s in enumerate([sxx, sxy, syy, szz, srz, wz, ur]):
+            results[iz][i] += s
+        iz += 1
+    for ih in range(len(lz)):
+        sxx, sxy, syy, szz, srz, wz, ur = results[ih]
+        ss.append([lz[ih], z1[ih], z2[ih], sxx, sxy, syy, szz, srz, wz, ur])
+    return ss
+def print_results(ssa):
+    print('n\tz1\tz2\tsxx\tsxy\tsyy\tszz\tsrz\twz\tur')
+    for sa in ssa:
+        print(sa)
+    print()
+def print_gels(params):
+    print('Vehicle\tWheels\tOutput\tPavement')
+    for param in params:
+        print(param, '\t', end='')
+    print()
+    results = run_gels(params)
+    print_results(results)  
+    return results  
+def hdes(vehicle, wheels, output, pavement, esubs, ths, layer_th, layer_str):
+    results_str = []
+    results_wz = []
+    for th in ths:
+        result_str = []
+        result_wz = []
+        for es in esubs:
+            # set thickness
+            pavement[0][layer_th - 1] = th
+            # set subgrade modulus of elasticity
+            pavement[1][-1] = es
+            # set subgrade poisson's ratio
+            pavement[2][-1] = poisson(es)
+       
+            results = run_gels((vehicle, wheels, output, pavement)) # quiet mode, else use print_gels
+
+            # stress at bottom of layer_str at output location, max of sxx, syy
+            result_str.append(max(results[(layer_str - 1) * 2 + 1][3], results[(layer_str - 1) * 2 + 1][5]))
+
+            # surface deflection at output location
+            result_wz.append(results[0][8])
+        # save each result for all values of subgrade modulus of elasticity
+        results_str.append(result_str)
+        results_wz.append(result_wz)
+    return results_str, results_wz   

@@ -1,0 +1,122 @@
+""" MIT License
+Copyright 2023 David Yang
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights 
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+copies of the Software, and to permit persons to whom the Software is 
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
+from math import cos, sqrt
+
+"""
+Abramowitz and Stegun, Handbook of Mathematical Functions
+
+"""
+# Zeros of J1(x), J0(x), J0(zs[2]==2.4048256) == 0 and J1(zs[3]==3.831706) == 0
+# If index, i for zs is even, then zs[i] is a J0(zs[i]) zero
+# if index, i for zs is odd, then zs[i] is a J1(zs[i]) zero
+zs = [ 
+       0.0,      1.0,      2.4048256,3.831706, 5.5200781,7.0155867,8.6537279 
+    , 10.173468,11.791534,13.323692,14.930918,16.470630,18.071064,19.615859 
+    , 21.211637,22.760084,24.352472,25.903672,27.493479,29.046829,30.634606 
+    , 32.18968, 33.775820,35.332308,36.917098,38.474766,40.058426,41.617094 
+    , 43.199792,44.759319,46.341188,47.901461,49.48261, 51.043535,52.624052 
+    , 54.185554,55.765551,57.327525,58.906984,60.469458,62.048469,63.611357 
+    , 65.189965,66.753227,68.331469,69.895072,71.472982,73.036895,74.614501 
+    , 76.1787,  77.756026,79.320487,80.897556,82.46226, 84.039091,85.604019 
+    , 87.18063, 88.745767,90.322173,91.887504,93.463719,95.029232,96.605268 
+    , 98.170951,99.74682,101.31266,102.88837,104.45437,106.02993,107.59606 
+    ,109.17149,110.73775] # J0(x), J1(x) zeros
+# Polynomial coefficients for J0(x) and J1(x) approximations
+a07 = [ 1.0,        -2.2499997,  1.2656208, -0.3163866,  0.0444479,  -0.0039444,   0.00021]
+a14 = [ 0.79788456, -0.00000077,-0.0055274, -0.00009512, 0.00137237, -0.00072805,  0.00014476]
+a21 = [-0.78539816, -0.04166397,-0.00003954, 0.00262573,-0.00054125, -0.00029333,  0.00013558]
+a28 =  [0.5,        -0.56249985, 0.21093573,-0.03954289, 0.00443319, -0.00031761,  0.00001109]
+a35 =  [0.79788456,  0.00000156, 0.01659667, 0.00017105,-0.00249511,  0.00113653, -0.00020033]
+a42 = [-2.35619449,  0.12499612, 0.0000565, -0.00637879, 0.00074348,  0.00079824, -0.00029166]
+def polyx(a, x): # Horner's rule polynomial evaluaton
+    y = a[-1]
+    for i, ai in enumerate(a[-2::-1]):
+        y = y * x + ai
+    return y
+def bes1(x): 
+    if -3.0 <= x <= 3.0: # J1(x), Polynomial Approximation, P.370, 9.4.4
+        x3 = x / 3.0
+        return polyx(a28, x3 * x3) * x
+    elif 3.0 < x: # J1(x), Polynomial Approximation, P.370, 9.4.6
+        x3 = 3.0 / x
+        return polyx(a35, x3) / sqrt(x) * cos(x + polyx(a42, x3))
+    else:
+        return 0.0
+def besz(x):
+    if -3.0 <= x <= 3.0: # J0(x), Polynomial Approximation, P.369, 9.4.1
+        x3 = x / 3.0
+        return polyx(a07, x3 * x3) 
+    elif 3.0 < x: # J0(x), Polynomial Approximation, P.369, 9.4.3 
+        x3 = 3.0 / x
+        return polyx(a14, x3) / sqrt(x) * cos(x + polyx(a21, x3))
+    else:
+        return 0.0
+def integrate_bessel(f, params):
+    # set function, # of values, radius, radial, depth, thickness, modulus, poisson, layer, depths
+    nss, ar, rr, zz, hs, es, mus, n, hns = params
+    # 4 point Gaussian Integration at xg points with wg weights
+    xg, wg = [-0.86113631, -0.33998104, 0.33998104, 0.86113631], [0.34785485,   0.65214515, 0.65214515, 0.34785485]
+    # initialize ax to zs[0] == 0.0 and sum to 0.0 for 4 integrals with nss values
+    ax, sum = zs[0], [[0.0 for j in range(4)] for i in range(nss)]
+    if ar < rr:
+        # J1(zs[i    ] * ar / rr) * J0(zs[i    ]), p * ar == zs[i    ] * ar / rr
+        # J1(zs[i + 1] * ar / rr) * J0(zs[i + 1]), p * ar == zs[i + 1] * ar / rr
+        # J1(zs[i    ] * ar / rr) != 0, J0(zs[i    ]) == 0 
+        # J1(zs[i + 1] * ar / rr) != 0, J0(zs[i + 1]) != 0
+        # last integration when J0(zs[i]) == 0, J1(zs[i + 1]) == 0        
+        lastzs = zs[1:] # end on a J1 zero
+    else:
+        # J1(zs[i    ]) * J0(zs[i    ] * rr / ar), p * ar == zs[i    ]
+        # J1(zs[i + 1]) * J0(zs[i + 1] * rr / ar), p * ar == zs[i + 1]
+        # J1(zs[i    ]) == 0, J0(zs[i    ]) != 0 
+        # J1(zs[i + 1]) != 0, J0(zs[i + 1]) == 0
+        # last integration when J1(zs[i]) == 0, J0(zs[i + 1]) == 0     
+        lastzs = zs[1:-1] # end on a J0 zero
+    for izs, azs in enumerate(lastzs):
+        # set bx to next zs
+        bx = azs
+        if ar < rr:
+            # set bx when ar < rr
+            bx = bx * ar / rr
+        dx = (bx - ax) / 2.0
+        ex = dx + ax
+        for ixg, axg in enumerate(xg):
+            pa = dx * axg + ex
+            p = pa / ar
+            pr = 0.0
+            if 0.0 < rr:
+                pr = p * rr
+            cx = dx * wg[ixg]
+            j1 = bes1(pa)
+            j2 = 1.0
+            j3 = 0.5
+            if 0.0 < rr:      
+                j2 = besz(pr)
+                j3 = bes1(pr)/pr 
+            fx = f(p, params) # stress/displacement at Hankel transform value
+            for i in range(len(fx)):
+                fxi = fx[i] * cx * j1
+                sum[i][0] += fxi * j2 
+                sum[i][1] += fxi * j3
+                sum[i][2] += fxi * j2 / p
+                sum[i][3] += fxi * j3 * p
+        # set next ax to bx
+        ax = bx
+    return sum

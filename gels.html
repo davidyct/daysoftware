@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta name="description" content="Dynamic Analysis Ware on Day Software" />
+<meta name="keywords" content="Pavements, Vehicles, Stresses, Displacements" />
+<meta name="author" content="David Yang" />
+<title>General Equilibrium of Elastic Layered Systems</title>
+<link rel="stylesheet" href="/css/tooltip.css" />
+<link rel="stylesheet" href="/css/gels.css" >
+<script language="javascript" src="/js/daygels.js"></script>
+<script language="javascript">
+
+function trimIH(value) {
+  return value.replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ');
+}
+
+function getvehicle() {
+  var table = document.getElementById("myVehicle");
+  var columns = table.rows[1].cells;
+  var opwgt = parseFloat(trimIH((columns[0].firstChild).innerHTML));
+  var wgt = parseFloat(trimIH((columns[1].firstChild).innerHTML));
+  var psi = parseFloat(trimIH((columns[2].firstChild).innerHTML));
+  return [0.0, Math.sqrt(opwgt * wgt / (Math.PI * psi)), opwgt, wgt, psi];
+}
+
+function putvehicle(opwgt, wgt, psi) {
+  deleteResults();
+  var table = document.getElementById("myVehicle");
+  var columns = table.rows[1].cells;
+  (columns[0].firstChild).innerHTML = opwgt.toFixed(2);
+  (columns[1].firstChild).innerHTML = wgt.toFixed(4);
+  (columns[2].firstChild).innerHTML = psi.toFixed(2);
+}
+
+function getwheels() {
+  var table = document.getElementById("myWheels");
+  var zero = [];
+  var xwheel = [];
+  var ywheel = [];
+  zero[0] = 0.0;
+  xwheel[0] = parseFloat("0.00");
+  ywheel[0] = parseFloat("0.00");
+  for (var i = 1; i < table.rows.length; i++) {
+    columns = table.rows[i].cells;
+    zero[i] = 0.0;
+    xwheel[i] = parseFloat(trimIH((columns[0].firstChild).innerHTML));
+    ywheel[i] = parseFloat(trimIH((columns[1].firstChild).innerHTML));
+  }
+  return [zero, xwheel, ywheel];
+}
+
+function addwheel() {
+  deleteResults();
+  var table = document.getElementById("myWheels");
+  var row = table.insertRow(table.rows.length);
+  var col1 = row.insertCell(0);
+  var col2 = row.insertCell(1);
+  col1.innerHTML = "<div contenteditable>0.00</div>";
+  col2.innerHTML = "<div contenteditable>0.00</div>";
+}
+
+function deletewheel() {
+  deleteResults();
+  var table = document.getElementById("myWheels");
+  if (table.rows.length < 3) return;
+  table.deleteRow(table.rows.length - 1);
+}
+
+function putwheels(xwheel, ywheel) {
+  deleteResults();
+  var table = document.getElementById("myWheels");
+  if (table.rows.length > 1) {
+    for (var i = table.rows.length - 1; i > 0; i--) {
+      table.deleteRow(i)
+    }
+  }
+  for (var i = 0; i < xwheel.length; i++) {
+    var row = table.insertRow(table.rows.length);
+    var col1 = row.insertCell(0);
+    var col2 = row.insertCell(1);
+    col1.innerHTML = "<div contenteditable>" + xwheel[i].toFixed(2) + "</div>";
+    col2.innerHTML = "<div contenteditable>" + ywheel[i].toFixed(2) + "</div>";
+  }
+}
+
+function getoutput() {
+  var table = document.getElementById("myOutput");
+  var columns = table.rows[1].cells;
+  var xout = parseFloat(trimIH((columns[0].firstChild).innerHTML));
+  var yout = parseFloat(trimIH((columns[1].firstChild).innerHTML));
+  return [0.0, xout, yout];
+}
+
+function putoutput(xout, yout) {
+  deleteResults();
+  var table = document.getElementById("myOutput");
+  var columns = table.rows[1].cells;
+  (columns[0].firstChild).innerHTML = xout.toFixed(2);
+  (columns[1].firstChild).innerHTML = yout.toFixed(2);
+}
+
+function getpavement() {
+  var table = document.getElementById("myPavement");
+  var zero = [];
+  var th = [];
+  var ev = [];
+  zero[0] = 0.0;
+  th[0] = parseFloat("0.00");
+  ev[0] = parseFloat("0.00");
+  for (var i = 1; i < table.rows.length; i++) {
+    columns = table.rows[i].cells;
+    zero[i] = 0.0;
+    th[i] = parseFloat(trimIH((columns[0].firstChild).innerHTML));
+    ev[i] = parseFloat(trimIH((columns[1].firstChild).innerHTML));
+  }
+  return [zero, th, ev];
+}
+
+function addlayer() {
+  deleteResults();
+  var table = document.getElementById("myPavement");
+  var row = table.insertRow(table.rows.length);
+  var col1 = row.insertCell(0);
+  var col2 = row.insertCell(1);
+  for (var i = table.rows.length - 2; i > 0; i--) {
+    col1.innerHTML = table.rows[i].cells[0].innerHTML;
+    col2.innerHTML = table.rows[i].cells[1].innerHTML;
+    col1 = table.rows[i].cells[0];
+    col2 = table.rows[i].cells[1];
+  }
+  col1.innerHTML = "<div contenteditable>2.00</div>";
+  col2.innerHTML = "<div contenteditable>100000.00</div>";
+}
+
+function deletelayer() {
+  deleteResults();
+  var table = document.getElementById("myPavement");
+  if (table.rows.length < 3) return;
+  var row = table.rows[table.rows.length - 1];
+  for (var i = 1; i < table.rows.length - 1; i++) {
+    table.rows[i].cells[0].innerHTML = table.rows[i+1].cells[0].innerHTML;
+    table.rows[i].cells[1].innerHTML = table.rows[i+1].cells[1].innerHTML;
+  }
+  table.deleteRow(table.rows.length - 1);
+}
+
+function putpavement(th, ev) {
+  deleteResults();
+  var table = document.getElementById("myPavement");
+  if (table.rows.length > 1) {
+    for (var i = table.rows.length - 1; i > 0; i--) {
+      table.deleteRow(i);
+    }
+  }
+  for (var i = 0; i < th.length; i++) {
+    var row = table.insertRow(table.rows.length);
+    var col1 = row.insertCell(0);
+    var col2 = row.insertCell(1);
+    col1.innerHTML = "<div contenteditable>" + th[i].toFixed(2) + "</div>";
+    col2.innerHTML = "<div contenteditable>" + ev[i].toFixed(2) + "</div>";
+  }
+}
+
+function populateDebug(a, num) {
+  var debug = document.getElementById("debug").rows[0].cells[0].innerHTML;
+  if (debug != "1") return;
+  var table = document.getElementById("myDebug"+num)
+  if (table.rows.length > 1) {
+    for (var i = table.rows.length - 1; i > -1; i--) {
+      table.deleteRow(i);
+    }
+  }
+  for (var i = 1; i < a.length; i++) {
+    var row = table.insertRow(i - 1);
+    var col = row.insertCell(0);
+    col.innerHTML = a[i].toFixed(8);
+  }
+}
+
+function deleteResults() {
+  var resultsDiv = document.getElementById("ResultsDiv");
+  resultsDiv.style.visibility = "visible";
+  var header = document.getElementById("ResultsHeader");
+  header.style.visibility = "visible";
+  var table = document.getElementById("myResults");
+  table.style.visibility = "visible";
+  if (table.rows.length > 1) {
+    for (var iz = table.rows.length - 1; iz > 0; iz--) {
+      table.deleteRow(iz);
+    }
+  }
+}
+
+function putResults(ts,zz) {
+  deleteResults();
+  var resultsDiv = document.getElementById("ResultsDiv");
+  resultsDiv.style.visibility = "visible";
+  var header = document.getElementById("ResultsHeader");
+  header.style.visibility = "visible";
+  var table = document.getElementById("myResults");
+  table.style.visibility = "visible";
+  var l = 0;
+  for (var iz = 1; iz < zz.length; iz++) {
+    var row = table.insertRow(iz);
+    var coll = row.insertCell(0);
+    if (iz % 2 === 1) l++;
+    coll.innerHTML = l.toFixed(0);
+    var colz = row.insertCell(1);
+    colz.innerHTML = zz[iz].toFixed(2);
+    var col1 = row.insertCell(2);
+    col1.innerHTML = ts[1][iz].toFixed(2);
+    var col2 = row.insertCell(3);
+    col2.innerHTML = ts[2][iz].toFixed(2);
+    var col3 = row.insertCell(4);
+    col3.innerHTML = ts[4][iz].toFixed(2);
+    var col4 = row.insertCell(5);
+    col4.innerHTML = ts[6][iz].toFixed(2);
+    var col5 = row.insertCell(6);
+    col5.innerHTML = ts[7][iz].toFixed(6);
+  }
+}
+
+function getGels() {
+  var results = daygels.gels(getvehicle(), getwheels(), getoutput(), getpavement());
+  putResults(results[0], results[1]);
+}
+
+function loadtest1() {
+  /* 1 layer wzero=0.39864959 for 200.0 psi, 9.0 in radius */
+  var radius = 9.0; // in
+  var psi = 200.0; // psi
+  putvehicle(Math.PI * radius * radius * psi, 1.0, psi);
+  putwheels([0.00], [0.00]);
+  putoutput(0.00, 0.00);
+  putpavement([999.00], [8000.00]);
+}
+
+function loadtest2() {
+  /* 2 layer wzero=0.25719360 for 200.0 psi, 9.0 radius */
+  var radius = 9.0; // in
+  var psi = 200.0; // psi
+  putvehicle(Math.PI * radius * radius * psi, 1.0, psi);
+  putwheels([0.00], [0.00]);
+  putoutput(0.00, 0.00);
+  putpavement([8.00, 999.00], [30000.00, 8000.00]);
+}
+
+function loadtest3() {
+  /* 3 layer wzero=0.04325943 for 200.0 psi, 9.0 radius/ Fortran Gels NDT3 0.043252
+               stress12=396.45682566                     / 396.456 */
+  var radius = 9.00; // in
+  var psi = 200.00; // psi
+  putvehicle(Math.PI * radius * radius * psi, 1.0, psi);
+  putwheels([0.00], [0.00]);
+  putoutput(0.00, 0.00);
+  putpavement([12.00, 8.00, 999.00], [3000000.00, 30000.00, 8000.00]);
+}
+
+function loadtest4() {
+  /* 4 layer wzero=0.06064239 for 200.0 psi, 9.0 radius/ Fortran Gels NDT3 0.060522
+               stress12=613.97078550                     / 613.978 */
+  var radius = 9.00; // in
+  var psi = 200.00; // psi
+  putvehicle(Math.PI * radius * radius * psi, 1.0, psi);
+  putwheels([0.00], [0.00]);
+  putoutput(0.00, 0.00);
+  putpavement([4.00, 8.00, 8.00, 999.00], [180000.00, 3000000.00, 30000.00, 8000.00]);
+}
+
+function loadtest5() {
+  /*4 layer wzero=0.09344135 for 170.0 psi, 170000.0 opwgt, .2309 wgt/ Fortran Gels PFLN 0.093435
+               stress12=624.63548532                     / 624.513*/
+  putvehicle(170000.00, 0.2309, 170.00);
+  putwheels([0.00, -34.00, 191.00, 225.00], [0.00, 0.00, 0.00, 0.00]);
+  putoutput(0.0, 0.0);
+  putpavement([4.00, 8.00, 8.00, 999.00], [180000.00, 3000000.00, 30000.00, 8000.00]);
+}
+
+</script>
+</head>
+<body>
+<div id="wrapper">
+<div id="header">
+<p>
+<div>
+&nbsp;&nbsp;<a href="/index.html"><div class="tooltip">Home<span class="tooltiptext">Home</span></div></a>
+&nbsp;&nbsp;<a href="/gels.html"><div class="tooltip">GELS<span class="tooltiptext">General Equilibrium of Elastic Layered Systems</span></div></a>
+&nbsp;&nbsp;<a href="/gels_help.html"><div class="tooltip">GELS Help<span class="tooltiptext">GELS Help</span></div></a>
+</div>
+</p>
+<h2>General Equilibrium of Elastic Layered Systems</h2>
+</div>
+<div id="main_content">
+<h3>Vehicle</h3>
+<table id="myVehicle">
+<tr><th>Operational Weight (lbs)</th><th>Single Wheel Factor</th><th>Tire Pressure (psi)</th></tr>
+<tr><td><div contenteditable>170000.00</div></td><td><div contenteditable>0.2309</div></td><td><div contenteditable>170.00</div></td></tr>
+</table>
+<h3>Wheel Coordinates</h3>
+<p>
+<a href="#" onclick="addwheel();">Add Wheel</a>&nbsp;&nbsp;<a href="#" onclick="deletewheel();">Delete Wheel</a>
+</p>
+<table id="myWheels">
+<tr><th>X (in)</th><th>Y (in)</th></tr>
+<tr><td><div>                  0.00</div></td><td><div>                0.00</div></td></tr>
+<tr><td><div contenteditable>-34.00</div></td><td><div contenteditable>0.00</div></td></tr>
+<tr><td><div contenteditable>191.00</div></td><td><div contenteditable>0.00</div></td></tr>
+<tr><td><div contenteditable>225.00</div></td><td><div contenteditable>0.00</div></td></tr>
+</table>
+<h3>Output Coordinates</h3>
+<table id="myOutput">
+<tr><th>X (in)</th><th>Y (in)</th></tr>
+<tr><td><div contenteditable>  0.00</div></td><td><div contenteditable>0.00</div></td></tr>
+</table>
+<h3>Pavement</h3>
+<p>
+<a href="#" onclick="addlayer();">Add Layer</a>&nbsp;&nbsp;<a href="#" onclick="deletelayer();">Delete Layer</a>
+</p>
+<table id="myPavement">
+<tr><th>Thickness (in)</th><th>Modulus of Elasticity (psi)</th></tr>
+<tr><td><div contenteditable>  4.00</div></td><td><div contenteditable> 180000.00</div></td></tr>
+<tr><td><div contenteditable>  8.00</div></td><td><div contenteditable>3000000.00</div></td></tr>
+<tr><td><div contenteditable>  8.00</div></td><td><div contenteditable>  30000.00</div></td></tr>
+<tr><td><div>                999.00</div></td><td><div contenteditable>   8000.00</div></td></tr>
+</table>
+<p>
+<a href="#" onclick="getGels();">Calculate Layer Stresses and Displacements due to Vehicle Multiple Wheel Loads</a> 
+</p>
+<div id="ResultsDiv" style="visibility:visible;" >
+<h3 id="ResultsHeader" style="visibility:visible">Results</h3>
+<table id="myResults" style="visibility:visible">
+<tr><th>Layer</th><th>z (in)</th><th>Sxx (psi)</th><th>Sxy (psi)</th><th>Syy (psi)</th><th>Szz (psi)</th><th>Wz (in)</th></tr>
+</table>
+</div>
+<p>
+<a href="#" onclick="loadtest1();">1 Layer Test, 1 Wheel</a> 
+<br/>
+<a href="#" onclick="loadtest2();">2 Layer Test, 1 Wheel</a> 
+<br/>
+<a href="#" onclick="loadtest3();">3 Layer Test, 1 Wheel</a> 
+<br/>
+<a href="#" onclick="loadtest4();">4 Layer Test, 1 Wheel</a> 
+<br/>
+<a href="#" onclick="loadtest5();">4 Layer Test, 4 Wheels</a> 
+</p>
+<table id="debug" style="display:none">
+<tr><td>0</td></tr>
+</table>
+<br/>
+</div>
+<div id="footer">
+<p>
+MIT License
+<br/>
+Copyright 2020 David Yang
+<br/>
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+</p>
+</div>
+</body>
+</html>

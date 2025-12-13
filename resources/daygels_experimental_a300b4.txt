@@ -1,0 +1,177 @@
+""" MIT License
+Copyright 2023 David Yang
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights 
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+copies of the Software, and to permit persons to whom the Software is 
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
+from daygels import print_gels, poisson
+
+# Operational Weight - lbs, Single Wheel Factor, Tire Pressure - psi
+vehicle =[400000.0, 0.1195, 171.0] # 
+# Wheel X Coordinates - in, Wheel Y Coordinates - in
+wheels = [[0.0, -38.0, 0.0, -38.0, 340.0, 378.0, 340.0, 378.0],
+         [0.0, 0.0, 60.0, 60.0, 0.0, 0.0, 60.0, 60.0]]
+# Result Output X Coordinate - in, Result Output Y Coordinate - in
+output = [0.0, 0.0]
+#output = [426.0, 0.0] # 4 feet right of 0, 378 tire
+#output = [-19.0, 0.0] # center line
+#output = [-43.0, 0.0] # 2 feet left of center line
+#output = [5.0, 0.0] # 2 feet right of center line
+
+# Section I, 4 layers
+print("Section I, 4 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[11.9, 3.7, 7.6, 999.0], [200000.0, 40000.0, 20000.0, 7300.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+
+# Section II, 3 layers
+print("Section II, 3 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[4.8, 8.2, 999.0], [200000.0, 40000.0, 9000.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+
+# Section III, 4 layers
+print("Section III, 4 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[4.9, 8.3, 6.8, 999.0], [200000.0, 40000.0, 20000.0, 6400.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+
+# Section IV, 4 layers
+print("Section IV, 4 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[6.7, 5.9, 6.8, 999.0], [200000.0, 60000.0, 20000.0, 8100.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+
+# Section V, 4 layers
+print("Section V, 4 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[7.9, 5.6, 7.1, 999.0], [200000.0, 200000.0, 20000.0, 5500.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+
+# Section VI, 4 layers
+print("Section VI, 4 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[7.7, 6.1, 6.5, 999.0], [200000.0, 1100000.0, 20000.0, 6300.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+
+# Section VII, 4 layers
+print("Section VII, 4 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[8.9, 5.9, 7.4, 999.0], [200000.0, 40000.0, 20000.0, 7700.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+
+# Section VIII, 4 layers
+print("Section VIII, 4 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[8.4, 6.1, 16.8, 999.0], [200000.0, 40000.0, 20000.0, 6800.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+
+# Section IX, 5 layers
+print("Section IX, 5 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[8.1, 8.4, 8.3, 6.4, 999.0], [200000.0, 1100000.0, 600000.0, 400000.0, 6500.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+
+# Section X, 6 layers
+print("Section X, 5 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[7.9, 9.0, 13.1, 7.3, 999.0], [200000.0, 1100000.0, 600000.0, 400000.0, 6200.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+
+# Section XI, 4 layers
+print("Section XI, 4 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[8.0, 7.7, 9.3, 999.0], [200000.0, 1100000.0, 400000.0, 7100.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+
+# Section XII, 4 layers
+print("Section XII, 4 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[7.4, 5.7, 7.8, 999.0], [200000.0, 1100000.0, 400000.0, 6900.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+
+# Section XIII, 5 layers
+print("Section XIII, 5 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[5.6, 6.7, 3.4, 6.5, 999.0], [200000.0, 1100000.0, 60000.0, 20000.0, 7200.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+
+# Section XIV, 4 layers
+print("Section XIV, 4 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[4.7, 6.5, 11.6, 999.0], [200000.0, 200000.0, 20000.0, 7100.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+
+# Section XV, 3 layers
+print("Section XV, 3 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[3.2, 5.6, 999.0], [200000.0, 20000.0, 8300.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+
+# Section IA, 4 layers
+print("Section IA, 4 layers")
+# Layer Thickness - in, Layer Modulus of Elasticity - psi, Poisson's Ratio default
+pavement = [[4.9, 6.2, 5.6, 999.0], [4000000.0, 1500000.0, 20000.0, 7200.0]]
+pavement.append([poisson(ev) for ev in pavement[1]])
+print_gels((vehicle, [w[:1] for w in wheels], output, [[sum(pavement[0][:-1])] + pavement[0][-1:]] + [[p[-1], p[-1]] for p in pavement[1:]]))
+print_gels((vehicle, [w[:1] for w in wheels], output, pavement))
+print_gels((vehicle, wheels, output, pavement))
+

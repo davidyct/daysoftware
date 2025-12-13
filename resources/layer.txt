@@ -1,0 +1,187 @@
+""" MIT License
+Copyright 2023 David Yang
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights 
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+copies of the Software, and to permit persons to whom the Software is 
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
+from math import exp
+
+"""
+Crawford, Hopkins, Smith, Theoretical Relationships between Moduli for Soil Layers beneath Concrete Pavements
+
+"""
+# python lists are index zero based, the equation solution in reference is index one based
+# functions are used to convert between reference one based indexes and python zero based indexes
+def fp():
+    return fp.p
+def hn(n): # depth of layer
+    return hn.hns[n - 1]
+def th(n): # layer thickness
+    return th.ths[n - 1]
+def ev(n): # layer modulus of elasticity
+    return ev.evs[n - 1]
+def mu(n): # layer poisson's ratio
+    return mu.mus[n - 1]
+def emu(n): # layer constant
+    return (1.0 + mu(n)) / ev(n)
+# layer constants, pages 36 - 38
+def beta1(n):
+    return emu(n + 1) / emu(n)
+def beta2(n):
+    return beta1(n) - 4.0 * mu(n) + 3.0
+def beta3(n):
+    return 2.0 * fp() * hn(n) - 4.0 * mu(n + 1) + 1.0
+def beta4(n):
+    return 2.0 * fp() * hn(n) + 4.0 * mu(n + 1) - 1.0
+def beta5(n):
+    return -2.0 * fp() * hn(n) + 4.0 * mu(n) - 1.0
+def beta6(n):
+    return beta1(n) * (3.0 - 4.0 * mu(n + 1)) + 1.0
+def beta12(n):
+    return beta6(n) - 4.0 * (1.0 - mu(n))
+def beta7(n):
+    return 2.0 * fp() * hn(n) + 4 * mu(n) - 1
+def beta8(n):
+    return (beta4(n) * beta2(n) - beta7(n) * beta6(n)) / 2.0
+def beta9(n):
+    return (beta3(n) * beta2(n) + beta5(n) * beta6(n)) / 2.0
+def beta10(n):
+    return (beta12(n) - beta7(n) * (1.0 - beta1(n)) * beta3(n)) / 2.0
+def beta11(n):
+    return (-beta12(n) - beta5(n) * (1.0 - beta1(n)) * beta4(n)) / 2.0
+def put_betas(N): # create list of betas
+    f_betas, betas = [beta1, beta2, beta3, beta4, beta5, beta6, beta7, beta8, beta9, beta10, beta11, beta12], []
+    if N > 1:
+        for n in range(1, N):
+            betan = []
+            for f_beta in f_betas:
+                betan.append(f_beta(n))
+            betas.append(betan)
+    return betas
+def beta(n, i):
+    return beta.betas[n - 1][i - 1]
+# return A constants, with A1 = A5 * exp(-2*p*Hn) and A3 = A6 * exp(-2*p*Hn), page 39
+def a(n, i):
+    if i == 1:
+        return a.a_s[n - 1][5 - 1] * exp(-2.0 * fp() * hn(n))
+    if i == 3:
+        return a.a_s[n - 1][6 - 1] * exp(-2.0 * fp() * hn(n))
+    return a.a_s[n - 1][i - 1]
+def put_a5(n): # create A5, pages 39 - 40
+    sum = beta(n, 2) * exp(-2.0 * fp() * th(n + 1)) * a(n + 1, 5)
+    sum += beta(n, 7) * (beta(n, 1) - 1.0) * a(n + 1, 2)
+    sum += beta(n, 8) * exp(-2.0 * fp() * th(n + 1)) * a(n + 1, 6)
+    sum += beta(n, 10) * a(n + 1, 4)
+    sum /= 4.0 * (1.0 - mu(n))
+    return sum
+def put_a2(n): # create A2
+    sum = beta(n, 5) * (beta(n, 1) - 1.0) * exp(-2.0 * fp() * th(n + 1)) * a(n + 1, 5)
+    sum += beta(n, 2) * a(n + 1, 2)
+    sum += beta(n, 11) * exp(-2.0 * fp() * th(n + 1)) * a(n + 1, 6)
+    sum += beta(n, 9) * a(n + 1, 4)
+    sum /= 4.0 * (1.0 - mu(n))
+    return sum
+def put_a6(n): # create A6
+    sum = 2.0 * (1.0 - beta(n, 1)) * a(n + 1, 2)
+    sum += beta(n, 6) * exp(-2.0 * fp() * th(n + 1)) * a(n + 1, 6)
+    sum += beta(n, 3) * (1.0 - beta(n, 1)) * a(n + 1, 4)
+    sum /= 4.0 * (1.0 - mu(n))
+    return sum
+def put_a4(n): # create A5
+    sum = 2.0 * (beta(n, 1) - 1.0) * exp(-2.0 * fp() * th(n + 1)) * a(n + 1, 5)
+    sum += beta(n, 4) * (beta(n, 1) - 1.0) * exp(-2.0 * fp() * th(n + 1)) * a(n + 1, 6)
+    sum += beta(n, 6) * a(n + 1, 4)
+    sum /= 4.0 * (1.0 - mu(n))
+    return sum
+# set value of ani into A, need to create new list to avoid python reusing previous list
+def put_ani(ani, n, i):
+    a_s_new = []
+    for k, r in enumerate(a.a_s):
+        row = []
+        for j, c in enumerate(r):
+            col = c
+            if k == n - 1:
+                if j == i - 1:
+                    col = ani
+            row.append(col)
+        a_s_new.append(row)
+    return a_s_new
+def get_an(n):
+    return [a(n, 1), a(n, 2), a(n, 3), a(n, 4), a(n, 5), a(n, 6)]
+def get_ani(n, i):
+    return a(n, i)
+# set A values of layers
+def put_a_s(n):
+    # indexes and create functions
+    a_i , f_i = [5, 2, 6, 4], [put_a5, put_a2, put_a6, put_a4]
+    for i, f in enumerate(f_i):
+        a.a_s = put_ani(f(n), n, a_i[i]) # set layer A5, A2, A6, A4
+    a.a_s = put_ani(0, n, 1) # set layer A1 to zero
+    a.a_s = put_ani(0, n, 3) # set layer A3 to zero
+# Solve for A2 and A4 of bottom layer, page 41    
+def get_a_s():
+    an = [0.0, 1.0, 0.0, 0.0, 0.0, 0.0] # zero based index, A1 to A6
+    a.a_s = [[0.0 for i in range(6)] for n in range(len(th.ths))]
+    for i, ani in enumerate(an):
+        a.a_s = put_ani(ani, len(th.ths), i + 1) # set bottom layer, A
+    if len(th.ths) > 1:
+        for n in list(range(1, len(th.ths)))[::-1]: # reverse order
+            put_a_s(n) # layers > 1
+    a21, a22, a23, a24 = get_ani(1, 5), get_ani(1, 2), get_ani(1, 6), get_ani(1, 4) # top layer, A
+
+    an = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0] # zero based index, A1 to A6
+    a.a_s = [[0.0 for i in range(6)] for n in range(len(th.ths))]
+    for i, ani in enumerate(an):
+        a.a_s = put_ani(ani, len(th.ths), i + 1) # set bottom layer, A
+    if len(th.ths) > 1:
+        for n in list(range(1, len(th.ths)))[::-1]: # reverse order
+            put_a_s(n) # layers > 1
+    a41, a42, a43, a44 = get_ani(1, 5), get_ani(1, 2), get_ani(1, 6), get_ani(1, 4) # top layer, A
+    
+    # page 41, 2 x 2 matrix inversion, solved explicitly for A2 and A4 of bottom layer
+    c2, c3 =  exp(-2.0 * fp() * hn(1)), (a21 * a44 - a24 * a41 + a22 * a43 - a23 * a42) * (4.0 * mu(1) - 1.0)
+    c4 = (a23 * a44 - a24 * a43) * 4.0 * mu(1) * (2.0 * mu(1) - 1.0)
+    c1 = ((a23 * a41 - a21 * a43) * c2 + (a22 * a41 - a21 * a42) * 2.0 + c3 + c4) * c2 + a24 * a42 - a22 * a44
+    an2 =  ((a41 + (2.0 * mu(1)) * a43) * c2 + a42 - (2.0 * mu(1)) * a44) / c1
+    an4 = -((a21 + (2.0 * mu(1)) * a23) * c2 + a22 - (2.0 * mu(1)) * a24) / c1
+    
+    an = [0.0, an2, 0.0, an4, 0.0, 0.0] # set bottom layer, A
+    a.a_s = [[0.0 for i in range(6)] for n in range(len(th.ths))]
+    for i, ani in enumerate(an):
+        a.a_s = put_ani(ani, len(th.ths), i + 1)  # set bottom layer, A
+    if len(th.ths) > 1:
+        for n in list(range(1, len(th.ths)))[::-1]: # reverse order
+            put_a_s(n) # layers > 1
+def f_s_all(p, params): # calulate stresses and displacements for Hankel transform variable, p
+    nss, ar, rr, zz, hs, es, mus, n, hns = params
+    fp.p, th.ths, ev.evs, mu.mus, hn.hns = p, hs, es, mus, hns
+    u, c, z = mu(n), emu(n), zz
+    eph, epz = exp(-2 * fp() * (hn(n) - z)), exp(-fp() * z)
+    if len(hs) > 1:
+        beta.betas = put_betas(len(hs)) 
+    get_a_s()  
+    a1, a2, a3, a4, a5, a6 = get_an(n)
+    a5 *= eph
+    a6 *= eph
+    # Hankel transformed stresses and displacements
+    szz =  a2 + a4*(fp()*z - 2*u + 1) - a5 - a6*(fp()*z + 2*u - 1)
+    srz =  a2 + a4*(fp()*z - 2*u) + a5 + a6*(fp()*z + 2*u)
+    wz  =  c*(-a2 - a4*(fp()*z - 4*u + 2) - a5 - a6*(fp()*z + 4*u - 2))
+    ur  =  c*(-a2 - a4*(fp()*z - 1) + a5 + a6*(fp()*z + 1))
+    srr =  -a2 - a4*(fp()*z - 2*u - 1) + a5 + a6*(fp()*z + 2*u + 1)
+    stt =  2*u*a4 + 2*u*a6
+    sss =  -a2 - a4*(fp()*z - 1) + a5 + a6*(fp()*z + 1)
+    return [sa * epz for sa in [szz, srz, wz, ur, srr, stt, sss]]            
