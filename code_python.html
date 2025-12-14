@@ -6,8 +6,8 @@
 <meta name="keywords" content="Pavements, Vehicles, Stresses, Displacements" />
 <meta name="author" content="David Yang" />
 <title>Dynamic Analysis Ware on Day Software</title>
-<link rel="stylesheet" href="/css/home.css" />
-<link rel="stylesheet" href="/css/tooltip.css" />
+<link rel="stylesheet" href="./css/home.css" />
+<link rel="stylesheet" href="./css/tooltip.css" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 <script language="javascript">
 function toggle(Id) {
@@ -33,7 +33,7 @@ function load_file(Id, ext) {
             document.getElementById(Id + "_pre").innerHTML = get_code(xhr.responseText);
         }
     }
-    xhr.open("GET", "/resources/" + Id + "." + ext, false);
+    xhr.open("GET", "./resources/" + Id + "." + ext, false);
     xhr.send();
 }
 
@@ -52,8 +52,8 @@ function get_code(text) {
 <div id="header">
 <p>
 <div>
-&nbsp;&nbsp;<a href="/index.html"><div class="tooltip">Home<span class="tooltiptext">Home</span></div></a>
-&nbsp;&nbsp;<a href="/gels.html"><div class="tooltip">GELS<span class="tooltiptext">General Equilibrium of Elastic Layered Systems</span></div></a>
+&nbsp;&nbsp;<a href="./index.html"><div class="tooltip">Home<span class="tooltiptext">Home</span></div></a>
+&nbsp;&nbsp;<a href="./gels.html"><div class="tooltip">GELS<span class="tooltiptext">General Equilibrium of Elastic Layered Systems</span></div></a>
 </div>
 </p>
 <h2>Dynamic Analysis Ware on Day Software</h2>
@@ -65,8 +65,8 @@ function get_code(text) {
 <div class="tooltip" style="width: 230px; padding-left: 20px;">bessel<span class="tooltiptext">bessel.txt</span></div>
 &nbsp;&nbsp;&nbsp;
 <button onclick="load_file('bessel', 'txt'); toggle('bessel')" ><div class="tooltip" id="bessel_icon"><i class="material-icons">add</i><span class="tooltiptext">Show Code</span></div></button>
-<a href="/resources/bessel.txt" target="_blank"><div class="tooltip"><i class="material-icons">open_in_browser</i><span class="tooltiptext">Open in new tab</span></div></a>
-<a href="/resources/bessel.txt" download><div class="tooltip"><i class="material-icons">arrow_downward</i><span class="tooltiptext">Download</span></div></a>
+<a href="./resources/bessel.txt" target="_blank"><div class="tooltip"><i class="material-icons">open_in_browser</i><span class="tooltiptext">Open in new tab</span></div></a>
+<a href="./resources/bessel.txt" download><div class="tooltip"><i class="material-icons">arrow_downward</i><span class="tooltiptext">Download</span></div></a>
 <div id="bessel_div" hidden="hidden" style="width: 95%; height: 320px; overflow-y: scroll;" >
 <pre id="bessel_pre" hidden="hidden">
 </pre>
@@ -76,8 +76,8 @@ function get_code(text) {
 <div class="tooltip" style="width: 230px; padding-left: 20px;">layer<span class="tooltiptext">layer.txt</span></div>
 &nbsp;&nbsp;&nbsp;
 <button onclick="load_file('layer', 'txt'); toggle('layer')" ><div class="tooltip" id="layer_icon"><i class="material-icons">add</i><span class="tooltiptext">Show Code</span></div></button>
-<a href="/resources/layer.txt" target="_blank"><div class="tooltip"><i class="material-icons">open_in_browser</i><span class="tooltiptext">Open in new tab</span></div></a>
-<a href="/resources/layer.txt" download><div class="tooltip"><i class="material-icons">arrow_downward</i><span class="tooltiptext">Download</span></div></a>
+<a href="./resources/layer.txt" target="_blank"><div class="tooltip"><i class="material-icons">open_in_browser</i><span class="tooltiptext">Open in new tab</span></div></a>
+<a href="./resources/layer.txt" download><div class="tooltip"><i class="material-icons">arrow_downward</i><span class="tooltiptext">Download</span></div></a>
 <div id="layer_div" hidden="hidden" style="width: 95%; height: 320px; overflow-y: scroll;" >
 <pre id="layer_pre" hidden="hidden">
 </pre>
@@ -87,8 +87,8 @@ function get_code(text) {
 <div class="tooltip" style="width: 230px; padding-left: 20px;">daygels<span class="tooltiptext">daygels.txt</span></div>
 &nbsp;&nbsp;&nbsp;
 <button onclick="load_file('daygels', 'txt'); toggle('daygels')" ><div class="tooltip" id="daygels_icon"><i class="material-icons">add</i><span class="tooltiptext">Show Code</span></div></button>
-<a href="/resources/daygels.txt" target="_blank"><div class="tooltip"><i class="material-icons">open_in_browser</i><span class="tooltiptext">Open in new tab</span></div></a>
-<a href="/resources/daygels.txt" download><div class="tooltip"><i class="material-icons">arrow_downward</i><span class="tooltiptext">Download</span></div></a>
+<a href="./resources/daygels.txt" target="_blank"><div class="tooltip"><i class="material-icons">open_in_browser</i><span class="tooltiptext">Open in new tab</span></div></a>
+<a href="./resources/daygels.txt" download><div class="tooltip"><i class="material-icons">arrow_downward</i><span class="tooltiptext">Download</span></div></a>
 <div id="daygels_div" hidden="hidden" style="width: 95%; height: 320px; overflow-y: scroll;" >
 <pre id="daygels_pre" hidden="hidden">
 </pre>
@@ -98,8 +98,8 @@ function get_code(text) {
 <div class="tooltip" style="width: 230px; padding-left: 20px;">daygels_example<span class="tooltiptext">daygels_example.txt</span></div>
 &nbsp;&nbsp;&nbsp;
 <button onclick="load_file('daygels_example', 'txt'); toggle('daygels_example')" ><div class="tooltip" id="daygels_example_icon"><i class="material-icons">add</i><span class="tooltiptext">Show Code</span></div></button>
-<a href="/resources/daygels_example.txt" target="_blank"><div class="tooltip"><i class="material-icons">open_in_browser</i><span class="tooltiptext">Open in new tab</span></div></a>
-<a href="/resources/daygels_example.txt" download><div class="tooltip"><i class="material-icons">arrow_downward</i><span class="tooltiptext">Download</span></div></a>
+<a href="./resources/daygels_example.txt" target="_blank"><div class="tooltip"><i class="material-icons">open_in_browser</i><span class="tooltiptext">Open in new tab</span></div></a>
+<a href="./resources/daygels_example.txt" download><div class="tooltip"><i class="material-icons">arrow_downward</i><span class="tooltiptext">Download</span></div></a>
 <div id="daygels_example_div" hidden="hidden" style="width: 95%; height: 320px; overflow-y: scroll;" >
 <pre id="daygels_example_pre" hidden="hidden">
 </pre>
@@ -109,8 +109,8 @@ function get_code(text) {
 <div class="tooltip" style="width: 230px; padding-left: 20px;">hdes_plot<span class="tooltiptext">hdes_plot.txt</span></div>
 &nbsp;&nbsp;&nbsp;
 <button onclick="load_file('hdes_plot', 'txt'); toggle('hdes_plot')" ><div class="tooltip" id="hdes_plot_icon"><i class="material-icons">add</i><span class="tooltiptext">Show Code</span></div></button>
-<a href="/resources/hdes_plot.txt" target="_blank"><div class="tooltip"><i class="material-icons">open_in_browser</i><span class="tooltiptext">Open in new tab</span></div></a>
-<a href="/resources/hdes_plot.txt" download><div class="tooltip"><i class="material-icons">arrow_downward</i><span class="tooltiptext">Download</span></div></a>
+<a href="./resources/hdes_plot.txt" target="_blank"><div class="tooltip"><i class="material-icons">open_in_browser</i><span class="tooltiptext">Open in new tab</span></div></a>
+<a href="./resources/hdes_plot.txt" download><div class="tooltip"><i class="material-icons">arrow_downward</i><span class="tooltiptext">Download</span></div></a>
 <div id="hdes_plot_div" hidden="hidden" style="width: 95%; height: 320px; overflow-y: scroll;" >
 <pre id="hdes_plot_pre" hidden="hidden">
 </pre>
@@ -120,8 +120,8 @@ function get_code(text) {
 <div class="tooltip" style="width: 230px; padding-left: 20px;">hdes_example<span class="tooltiptext">hdes_example.txt</span></div>
 &nbsp;&nbsp;&nbsp;
 <button onclick="load_file('hdes_example', 'txt'); toggle('hdes_example')" ><div class="tooltip" id="hdes_example_icon"><i class="material-icons">add</i><span class="tooltiptext">Show Code</span></div></button>
-<a href="/resources/hdes_example.txt" target="_blank"><div class="tooltip"><i class="material-icons">open_in_browser</i><span class="tooltiptext">Open in new tab</span></div></a>
-<a href="/resources/hdes_example.txt" download><div class="tooltip"><i class="material-icons">arrow_downward</i><span class="tooltiptext">Download</span></div></a>
+<a href="./resources/hdes_example.txt" target="_blank"><div class="tooltip"><i class="material-icons">open_in_browser</i><span class="tooltiptext">Open in new tab</span></div></a>
+<a href="./resources/hdes_example.txt" download><div class="tooltip"><i class="material-icons">arrow_downward</i><span class="tooltiptext">Download</span></div></a>
 <div id="hdes_example_div" hidden="hidden" style="width: 95%; height: 320px; overflow-y: scroll;" >
 <pre id="hdes_example_pre" hidden="hidden">
 </pre>
@@ -131,8 +131,8 @@ function get_code(text) {
 <div class="tooltip" style="width: 230px; padding-left: 20px;">daygels_experimental_a300b4<span class="tooltiptext">daygels_experimental_a300b4.txt</span></div>
 &nbsp;&nbsp;&nbsp;
 <button onclick="load_file('daygels_experimental_a300b4', 'txt'); toggle('daygels_experimental_a300b4')" ><div class="tooltip" id="daygels_experimental_a300b4_icon"><i class="material-icons">add</i><span class="tooltiptext">Show Code</span></div></button>
-<a href="/resources/daygels_experimental_a300b4.txt" target="_blank"><div class="tooltip"><i class="material-icons">open_in_browser</i><span class="tooltiptext">Open in new tab</span></div></a>
-<a href="/resources/daygels_experimental_a300b4.txt" download><div class="tooltip"><i class="material-icons">arrow_downward</i><span class="tooltiptext">Download</span></div></a>
+<a href="./resources/daygels_experimental_a300b4.txt" target="_blank"><div class="tooltip"><i class="material-icons">open_in_browser</i><span class="tooltiptext">Open in new tab</span></div></a>
+<a href="./resources/daygels_experimental_a300b4.txt" download><div class="tooltip"><i class="material-icons">arrow_downward</i><span class="tooltiptext">Download</span></div></a>
 <div id="daygels_experimental_a300b4_div" hidden="hidden" style="width: 95%; height: 320px; overflow-y: scroll;" >
 <pre id="daygels_experimental_a300b4_pre" hidden="hidden">
 </pre>
@@ -144,19 +144,19 @@ function get_code(text) {
 <b>Resources</b>
 <br/>
 <br/>
-<a href="/articles.html">Articles</a>
+<a href="./articles.html">Articles</a>
 <br/>
 <br/>
-<a href="/blog.html">Blog</a>
+<a href="./blog.html">Blog</a>
 <br/>
 <br/>
-<a href="/code_python.html">Code (Python)</a>
+<a href="./code_python.html">Code (Python)</a>
 <br/>
 <br/>
-<a href="/documents.html">Documents</a>
+<a href="./documents.html">Documents</a>
 <br/>
 <br/>
-<a href="/icossar25/">ICOSSAR25</a>
+<a href="./icossar25/">ICOSSAR25</a>
 </p>
 </div>    
 <div id="footer">
